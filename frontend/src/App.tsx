@@ -232,7 +232,10 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       <div>
         <div className='rowC'>
               <WorldMap />
-              <ChatScreen />
+              <ChatScreen playerName={videoInstance.userName}
+                          token={appState.sessionToken}
+                          coveyTownID={videoInstance.coveyTownID}
+              />
         </div>
         <div>
           <VideoOverlay preferredMode="fullwidth" />
