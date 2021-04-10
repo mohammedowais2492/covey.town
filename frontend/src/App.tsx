@@ -232,7 +232,7 @@ function App(props: { setOnDisconnect: Dispatch<SetStateAction<Callback | undefi
       <div>
         <div className='rowC'>
               <WorldMap />
-              <ChatScreen />
+              <ChatScreen/>
         </div>
         <div>
           <VideoOverlay preferredMode="fullwidth" />
