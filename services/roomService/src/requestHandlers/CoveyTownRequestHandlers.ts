@@ -235,11 +235,6 @@ export function townSubscriptionHandler(socket: Socket, ioServer: io.Server): vo
 
   // Listen for new messages
   socket.on(coveyTownID, (msg) => {
-    console.log("msg", msg);
-    // ioServer.in(coveyTownID).emit("groupMessage", msg);
     ioServer.emit(coveyTownID, msg);
   });
-
-  // console.log("ioServer", ioServer);
-  // console.log("socket", socket);
 }
