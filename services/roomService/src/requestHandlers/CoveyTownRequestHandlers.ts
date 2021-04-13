@@ -236,5 +236,20 @@ export function townSubscriptionHandler(socket: Socket, ioServer: io.Server): vo
   // Listen for new messages
   socket.on(coveyTownID, (msg) => {
     ioServer.emit(coveyTownID, msg);
+    // ioServer.emit(`${coveyTownID}'private'`, msg);
+    // console.log(msg.body)
+    // ioServer.to(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.sockets.in(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.of(coveyTownID).to(msg.sentTo).emit(coveyTownID, msg);
   });
+
+  socket.on(`${coveyTownID}'private'`, (msg) => {
+    // ioServer.emit(coveyTownID, msg);
+    ioServer.emit(`${coveyTownID}'private'`, msg);
+    // console.log(msg.body)
+    // ioServer.to(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.sockets.in(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.of(coveyTownID).to(msg.sentTo).emit(coveyTownID, msg);
+  });
+
 }

@@ -12,7 +12,10 @@ const NEW_CHAT_MESSAGE_EVENT = "groupMessage"; // Name of the event
 // const SOCKET_SERVER_URL = "http://localhost:8081";
 
 const useChat = (coveyTownID: string, socket: Socket) => {
-  const [messages, setMessages] = useState<MsgFormat[]>([]); // Sent and received messages
+  const [messages, setMessages] = useState<MsgFormat[]>([]);
+  const [sentTo, setSentTo] = useState('everyone');
+  const [sentBy, setSentBy] = useState('');
+  const [privateMessages, setMessagesPrivate] = useState<MsgFormatPrivate[]>([]); // Sent and received messages
   const socketRef = useRef(socket);
 
   const {
@@ -30,6 +33,17 @@ const useChat = (coveyTownID: string, socket: Socket) => {
       setMessages((msgs) => [...msgs, incomingMessage]);
     });
 
+    socketRef?.current?.on(`${coveyTownID}'private'`, (message: any) => {
+      const incomingMessage = {
+        ...message,
+        ownedByCurrentUser: message.senderId === socketRef.current?.id,
+      };
+      setMessagesPrivate((msgs) => [...msgs, incomingMessage]);
+      setSentTo(message.sentTo);
+      console.log('sender: ',message.sentBy)
+      setSentBy(message.sentBy);
+    });
+
     // Destroys the socket reference
     // when the connection is closed
     // return () => {
@@ -37,22 +51,63 @@ const useChat = (coveyTownID: string, socket: Socket) => {
     // };
   }, [coveyTownID]);
 
+  // useEffect(() => {
+
+  //   // Listens for incoming messages
+  //   socketRef?.current?.on(`${coveyTownID}'private'`, (message: any) => {
+  //     const incomingMessage = {
+  //       ...message,
+  //       ownedByCurrentUser: message.senderId === socketRef.current?.id,
+  //     };
+  //     setMessagesPrivate((msgs) => [...msgs, incomingMessage]);
+  //   });
+
+  //   // Destroys the socket reference
+  //   // when the connection is closed
+  //   // return () => {
+  //   //   socketRef.current.disconnect();
+  //   // };
+  // }, [coveyTownID]);
+
   // Sends a message to the server that
   // forwards it to all users in the same room
+  // const sendMessage = (receiver: string, messageBody: string) => {
+  //   socketRef.current.emit(coveyTownID,{
+  //     body: messageBody,
+  //     senderId: socketRef.current.id,
+  //     ownedByCurrentUser: true,
+  //     userName,
+  //     dateCreated: new Date(),
+  //     sentTo: receiver
+  //   });
+
+  //   // socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, messageBody) ;
+
+  // };
+
   const sendMessage = (messageBody: string) => {
-    socketRef.current.emit(coveyTownID, {
+    socketRef.current.emit(coveyTownID,{
+      body: messageBody,
+      senderId: socketRef.current.id,
+      ownedByCurrentUser: true,
+      userName,
+      dateCreated: new Date()
+    });
+  };
+
+  const sendMessagePrivate = (receiver: string, sender: string, messageBody: string) => {
+    socketRef.current.emit(`${coveyTownID}'private'`,{
       body: messageBody,
       senderId: socketRef.current.id,
       ownedByCurrentUser: true,
       userName,
       dateCreated: new Date(),
+      sentTo: receiver,
+      sentBy: sender
     });
-
-    // socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, messageBody) ;
-
   };
 
-  return { messages, sendMessage };
+  return { sentTo, sentBy , messages, sendMessage, privateMessages, sendMessagePrivate };
 };
 
 type MsgFormat = {
@@ -60,9 +115,17 @@ type MsgFormat = {
   senderId: string,
   ownedByCurrentUser: boolean,
   userName: string,
-  dateCreated: Date,
+  dateCreated: Date
 }
 
+type MsgFormatPrivate = {
+  body: string,
+  senderId: string,
+  ownedByCurrentUser: boolean,
+  userName: string,
+  dateCreated: Date,
+  sentTo: string
+}
 
 const ChatScreen = () => {
 
@@ -72,27 +135,26 @@ const ChatScreen = () => {
 
   const [newMessage, setNewMessage] = useState('');
   const [receiver, setReceiver] = useState('everyone');
-  const { messages, sendMessage } = useChat(currentTownID, socket as Socket);
+  const { sentTo, sentBy, messages, sendMessage, privateMessages, sendMessagePrivate } = useChat(currentTownID, socket as Socket);
   const styles = {
     textField: { width: "100%", borderWidth: 0, borderColor: "transparent" },
     sendButton: { backgroundColor: "#3f51b5" },
     sendIcon: { color: "white" },
   } as const;
 
-  console.log("messages", messages);
+  // console.log('private: ',privateMessages);
+  // console.log('player: ',myPlayerID)
+  console.log('Player: ',myPlayerID)
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
-    sendMessage(newMessage);
-    // if(receiver ===  'everyone') {
-    //   sendMessage(newMessage);
-    //     // send to all
-    // } else {
-    //   // send to receiver player id 
-    // }
-    // // reset message to empty once sent
+    if(receiver ===  'everyone') {
+      sendMessage(newMessage);
+    } else {
+      sendMessagePrivate(receiver,myPlayerID,newMessage); 
+    }
+    // reset message to empty once sent
     setNewMessage('');
-
   }
 
   const estyles = {
@@ -144,6 +206,31 @@ const ChatScreen = () => {
               </ListItem>
             ))}
           </ol>
+          { (myPlayerID === sentTo || myPlayerID === sentBy) &&
+            <ol>
+            {privateMessages.map((message) => (
+              // <li
+              //   key={JSON.stringify(message)}
+              // // className={`message-item ${
+              // //   message.ownedByCurrentUser ? "my-message" : "received-message"
+              // // }`}
+              // >
+              //   {message.body}
+              // </li>
+              <ListItem
+                key={JSON.stringify(message)}
+                style={estyles.listItem(message.ownedByCurrentUser)}>
+                <div style={estyles.author}>Private: {message.userName}</div>
+                <div style={estyles.container(message.ownedByCurrentUser)}>
+                  {message.body}
+                  {/* <div style={estyles.timestamp}>
+                  {message.dateCreated.toISOString()}
+                </div> */}
+                </div>
+              </ListItem>
+            ))}
+          </ol>
+          }
         </div>
         <form id="form">
           <input id="input"
