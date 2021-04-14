@@ -1,5 +1,5 @@
 import assert from 'assert';
-import { Socket } from 'socket.io';
+import io, { Socket } from 'socket.io';
 import Player from '../types/Player';
 import { CoveyTownList, UserLocation } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
@@ -198,7 +198,7 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-export function townSubscriptionHandler(socket: Socket): void {
+export function townSubscriptionHandler(socket: Socket, ioServer: io.Server): void {
   // Parse the client's session token from the connection
   // For each player, the session token should be the same string returned by joinTownHandler
   const { token, coveyTownID } = socket.handshake.auth as { token: string; coveyTownID: string };
@@ -232,4 +232,24 @@ export function townSubscriptionHandler(socket: Socket): void {
   socket.on('playerMovement', (movementData: UserLocation) => {
     townController.updatePlayerLocation(s.player, movementData);
   });
+
+  // Listen for new messages
+  socket.on(coveyTownID, (msg) => {
+    ioServer.emit(coveyTownID, msg);
+    // ioServer.emit(`${coveyTownID}'private'`, msg);
+    // console.log(msg.body)
+    // ioServer.to(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.sockets.in(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.of(coveyTownID).to(msg.sentTo).emit(coveyTownID, msg);
+  });
+
+  socket.on(`${coveyTownID}'private'`, (msg) => {
+    // ioServer.emit(coveyTownID, msg);
+    ioServer.emit(`${coveyTownID}'private'`, msg);
+    // console.log(msg.body)
+    // ioServer.to(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.sockets.in(msg.sentTo).emit(coveyTownID, msg);
+    // ioServer.of(coveyTownID).to(msg.sentTo).emit(coveyTownID, msg);
+  });
+
 }
