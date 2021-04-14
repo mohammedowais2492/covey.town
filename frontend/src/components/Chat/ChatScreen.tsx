@@ -40,7 +40,6 @@ const useChat = (coveyTownID: string, socket: Socket) => {
       };
       setMessagesPrivate((msgs) => [...msgs, incomingMessage]);
       setSentTo(message.sentTo);
-      console.log('sender: ',message.sentBy)
       setSentBy(message.sentBy);
     });
 
@@ -142,9 +141,8 @@ const ChatScreen = () => {
     sendIcon: { color: "white" },
   } as const;
 
-  // console.log('private: ',privateMessages);
-  // console.log('player: ',myPlayerID)
-  console.log('Player: ',myPlayerID)
+  // console.log('global: ',privateMessages);
+  // console.log('private: ',myPlayerID)
 
   const handleSubmit = (e: any) => {
     e.preventDefault();
