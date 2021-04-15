@@ -236,8 +236,12 @@ const ChatScreen = () => {
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)} 
             onKeyPress={e => {
-              if(e.key === 'Enter')
-                handleSubmit(e)
+              if(e.key === 'Enter'){
+                if(newMessage.length>0)
+                  handleSubmit(e)
+                else
+                  e.preventDefault();
+              }
               }}
             />
           <IconButton
