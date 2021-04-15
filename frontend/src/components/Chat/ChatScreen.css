@@ -6,15 +6,18 @@
 
 .heading {
   text-align: center;
-  border: 3px solid green;
   width: 25rem;
   font-weight: bold;
+  background: #333;
+  color: white;
 }
 
 .mbox {
-  border: 3px solid green;
+  border: 3px solid black;
   width: 25rem;
-  height: 43rem;
+  height: 43.5rem;
+  background-color: white;
+  overflow: scroll;
 }
 
 #form {

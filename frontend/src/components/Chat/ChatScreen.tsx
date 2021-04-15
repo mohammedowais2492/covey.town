@@ -137,7 +137,7 @@ const ChatScreen = () => {
   const { sentTo, sentBy, messages, sendMessage, privateMessages, sendMessagePrivate } = useChat(currentTownID, socket as Socket);
   const styles = {
     textField: { width: "100%", borderWidth: 0, borderColor: "transparent" },
-    sendButton: { backgroundColor: "#3f51b5" },
+    sendButton: { backgroundColor: "black" },
     sendIcon: { color: "white" },
   } as const;
 
@@ -230,16 +230,20 @@ const ChatScreen = () => {
           </ol>
           }
         </div>
-        <form id="form">
+        <form id="form" noValidate autoComplete="off">
           <input id="input"
             placeholder="Write message..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)} />
-          {/* <button type='submit' onClick={(e)=> handleSubmit(e)}>Send</button> */}
+            onChange={(e) => setNewMessage(e.target.value)} 
+            onKeyPress={e => {
+              if(e.key === 'Enter')
+                handleSubmit(e)
+              }}
+            />
           <IconButton
             style={styles.sendButton}
-            onClick={(e) => handleSubmit(e)}
-          >
+            disabled={!newMessage}
+            onClick={(e) => handleSubmit(e)}>
             <Send style={styles.sendIcon} />
           </IconButton>
         </form>
