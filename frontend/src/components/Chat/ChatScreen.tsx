@@ -7,6 +7,7 @@ import { Send } from "@material-ui/icons";
 import { Select } from '@chakra-ui/react';
 import useCoveyAppState from "../../hooks/useCoveyAppState";
 import './ChatScreen.css';
+import useMaybeVideo from "../../hooks/useMaybeVideo";
 
 const NEW_CHAT_MESSAGE_EVENT = "groupMessage"; // Name of the event
 // const SOCKET_SERVER_URL = "http://localhost:8081";
@@ -140,6 +141,7 @@ const ChatScreen = () => {
     sendButton: { backgroundColor: "black" },
     sendIcon: { color: "white" },
   } as const;
+  const video = useMaybeVideo();
 
   // console.log('global: ',privateMessages);
   // console.log('private: ',myPlayerID)
@@ -235,6 +237,8 @@ const ChatScreen = () => {
             placeholder="Write message..."
             value={newMessage}
             onChange={(e) => setNewMessage(e.target.value)} 
+            onFocus={()=>video?.pauseGame()}
+            onBlur={()=>video?.unPauseGame()}
             onKeyPress={e => {
               if(e.key === 'Enter'){
                 if(newMessage.length>0)
