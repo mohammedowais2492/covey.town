@@ -21,6 +21,8 @@
 ## Description
 
 - We implemented the chat-feature for the covey town application by using the socket.io library. As seen in the architectural diagram, we have extended the socket library to also handle messages sent via the chat box. 
+- Players are now able to send text messages to all other players in the same room. They have the option to send private text messgaes to a specific player as well.
+- Chat box also provides a prompt to chat when any other player is nearby on the World Map.
 
 #### Front-End changes
 - We created a new React component `ChatScreen.tsx` that renders the chatbox next to the map. This component is plugged into the UI from the `App.tsx` render method. 
@@ -31,7 +33,7 @@
 
 
 #### Backend Changes
-- The backend functionality is implemented by extending the socket library to include the option to listening for incoming chat messages from the client. This is done by extending the `townSubscriptionHandler`.
+- The backend functionality is implemented by extending the socket library to include the option to listen for incoming chat messages from the client. This is done by extending the `townSubscriptionHandler`.
 - We also added a new method to update messages to each of the player in the room using the `Listener pattern`. This is done in `CoveyTownController.ts`
 - We further extended the `CoveyTownListener` interface to include `onPlayerChatted()` which sends back the message payload back to the client. 
 - At a high level, the way we differentiate the groupChat vs privateChat is by chosing to include a reciever in the message payload or not.
@@ -39,7 +41,7 @@
 
 #### Existing code changes
 We did not change any of the existing code. We simply extended existing functionality to support incoming messages. 
-- On the backend, the files that were modified was: 
+- On the backend, the files that were modified were: 
     - `townSubscriptionHandler()` to add a socket for listening for incoming messages from the client
     - `CoveyTownListener` interface to include a new method for handling messages
     - A new method in `CoveyTownController` to registers listeners
