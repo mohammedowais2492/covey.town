@@ -22,5 +22,5 @@ We are interested in the feature because it will enhance the user experience of 
 #### Feature 3 (Chat with one player by choosing from dropdown list):
 
 1. Create and Join a new room or an existing one.
-2. Select a particular player in the group chat to direct message from the dropdown list.
+2. Select a particular player in the group chat to direct message from the dropdown list (located at top of the chat box section).
 3. Send and receive text in the chat to one particular online player.
