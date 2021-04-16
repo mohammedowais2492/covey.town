@@ -8,7 +8,7 @@ We are interested in the feature because it will enhance the user experience of 
 #### Feature 1 (Chat with All players/Group Chat):
 
 1. Create and Join a new room or an existing one.
-2. Send and receive texts in the chat to all online players (dropdown list should be set to **Everyone**).
+2. Send and receive texts in the chat to all online players (dropdown list should be set to **Everyone**) using the chatbox at the right hand corner of the screen. The dropdown list can be found at the top of the chatbox section.
 3. A window to chat with all the players in the room should be present on right side of the map.
 
 #### Feature 2 (Chat with one nearby player): 
@@ -16,7 +16,7 @@ We are interested in the feature because it will enhance the user experience of 
 1. Create and Join a new room or an existing one.
 2. Select a particular player to direct message.
 3. Send and receive text in the chat to one particular online player.
-4. When a user gets in proximity of another player, the nearby players section shows the player's name as a clickable button.
+4. When a user gets in proximity of another player, the nearby players section shows the player's name as a clickable button in the upper part of the chatbox section.
 5. Click the nearby player's button in order to send a private DM to the player visible to only sender and receiver.
 
 #### Feature 3 (Chat with one player by choosing from dropdown list):
