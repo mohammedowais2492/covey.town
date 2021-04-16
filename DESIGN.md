@@ -7,8 +7,11 @@
 
 
 ## CRC cards
+
+### FrontEnd
 ![CRC1](https://github.com/mohammedowais2492/covey.town/blob/master/CRC1.png)
 
+### BackEnd
 ![CRC2](https://github.com/mohammedowais2492/covey.town/blob/master/CRC2.png)
 
 ![CRC3](https://github.com/mohammedowais2492/covey.town/blob/master/CRC3.png)
@@ -18,7 +21,7 @@
 ## Description
 
 - We implemented the chat-feature for the covey town application by using the socket.io library. As seen in the architectural diagram, we have extended the socket library to also handle messages sent via the chat box. 
--
+
 #### Front-End changes
 - We created a new React component `ChatScreen.tsx` that renders the chatbox next to the map. This component is plugged into the UI from the `App.tsx` render method. 
 - The `ChatScreen` component also shows a dropdown list which lists all the players in the current covey room. 
