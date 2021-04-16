@@ -1,14 +1,15 @@
 # Covey.Town
 
-Covey.Town provides a virtual meeting space where different groups of people can have simultaneous video calls, allowing participants to drift between different conversations, just like in real life.
-Covey.Town was built for Northeastern's [Spring 2021 software engineering course](https://neu-se.github.io/CS4530-CS5500-Spring-2021/), and is designed to be reused across semesters.
-You can view our reference deployment of the app at [app.covey.town](https://app.covey.town/).
+Covey.Town provides a virtual meeting space where different groups of people can have simultaneous video calls and text chats, allowing participants to drift between different conversations, just like in real life.
+Covey.Town was built for Northeastern's [Spring 2021 software engineering course](https://neu-se.github.io/CS4530-CS5500-Spring-2021/).
+You can view our reference deployment of the app at [app.covey.town](https://hardcore-minsky-b004d2.netlify.app/).
 
-![Covey.Town Architecture](docs/covey-town-architecture.png)
+![Covey.Town Architecture](https://github.com/mohammedowais2492/covey.town/blob/master/HLAD.jpeg)
 
 The figure above depicts the high-level architecture of Covey.Town.
 The frontend client (in the `frontend` directory of this repository) uses the [PhaserJS Game Library](https://phaser.io) to create a 2D game interface, using tilemaps and sprites.
 The frontend implements video chat using the [Twilio Programmable Video](https://www.twilio.com/docs/video) API, and that aspect of the interface relies heavily on [Twilio's React Starter App](https://github.com/twilio/twilio-video-app-react).
+The frontend implements text chats using [Socket.io](https://socket.io/docs/v4) library. The text chat feature allows for group and private chats with ability to chat with other nearby players.
 
 A backend service (in the `services/roomService` directory) implements the application logic: tracking which "towns" are available to be joined, and the state of each of those towns.
 
