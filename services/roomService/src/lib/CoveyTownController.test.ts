@@ -67,15 +67,27 @@ describe('CoveyTownController', () => {
       testingTown.updatePlayerLocation(player, newLocation);
       mockListeners.forEach(listener => expect(listener.onPlayerMoved).toBeCalledWith(player));
     });
-    it('should notify added listeners of player chats when updatePlayerChats is called', async () => {
+    it('should notify added listeners of player boradcast chats when updatePlayerChats is called', async () => {
       const message: Message = {
         body: 'test message', 
         senderId: nanoid(), 
-        ownedByCurrentUser: true,
         userName: nanoid(),
         dateCreated: new Date(),
         isBroadcast: true,
-        receiverId: '',
+        receiverId: nanoid(),
+      };
+      mockListeners.forEach(listener => testingTown.addTownListener(listener));
+      testingTown.updatePlayerChats(message);
+      mockListeners.forEach(listener => expect(listener.onPlayerChatted).toBeCalledWith(message));
+    });
+    it('should notify added listeners of player private chats when updatePlayerChats is called', async () => {
+      const message: Message = {
+        body: 'test message', 
+        senderId: nanoid(), 
+        userName: nanoid(),
+        dateCreated: new Date(),
+        isBroadcast: false,
+        receiverId: nanoid(),
       };
       mockListeners.forEach(listener => testingTown.addTownListener(listener));
       testingTown.updatePlayerChats(message);
@@ -121,7 +133,6 @@ describe('CoveyTownController', () => {
       const message: Message = {
         body: 'test message', 
         senderId: nanoid(), 
-        ownedByCurrentUser: true,
         userName: nanoid(),
         dateCreated: new Date(),
         isBroadcast: true,
@@ -202,21 +213,36 @@ describe('CoveyTownController', () => {
         testingTown.updatePlayerLocation(player, generateTestLocation());
         expect(mockSocket.emit).toBeCalledWith('playerMoved', player);
       });
-      it('should add a town listener, which should emit "playerChatted" to the socket when a player chats', async () => {
-        TestUtils.setSessionTokenAndTownID(testingTown.coveyTownID, session.sessionToken, mockSocket);
-        townSubscriptionHandler(mockSocket);
-        const message: Message = {
-          body: 'test message', 
-          senderId: nanoid(), 
-          ownedByCurrentUser: true,
-          userName: nanoid(),
-          dateCreated: new Date(),
-          isBroadcast: true,
-          receiverId: '',
-        };
-        testingTown.updatePlayerChats(message);
-        expect(mockSocket.emit).toBeCalledWith('playerChatted', message);
-      });
+      it('should add a town listener, which should emit "playerChatted" to the socket when a player sends broadcast chats', 
+        async () => {
+          TestUtils.setSessionTokenAndTownID(testingTown.coveyTownID, session.sessionToken, mockSocket);
+          townSubscriptionHandler(mockSocket);
+          const message: Message = {
+            body: 'test message', 
+            senderId: nanoid(), 
+            userName: nanoid(),
+            dateCreated: new Date(),
+            isBroadcast: true,
+            receiverId: nanoid(),
+          };
+          testingTown.updatePlayerChats(message);
+          expect(mockSocket.emit).toBeCalledWith('playerChatted', message);
+        });
+      it('should add a town listener, which should emit "playerChatted" to the socket when a player sends private chats', 
+        async () => {
+          TestUtils.setSessionTokenAndTownID(testingTown.coveyTownID, session.sessionToken, mockSocket);
+          townSubscriptionHandler(mockSocket);
+          const message: Message = {
+            body: 'test message', 
+            senderId: nanoid(), 
+            userName: nanoid(),
+            dateCreated: new Date(),
+            isBroadcast: false,
+            receiverId: nanoid(),
+          };
+          testingTown.updatePlayerChats(message);
+          expect(mockSocket.emit).toBeCalledWith('playerChatted', message);
+        });
       it('should add a town listener, which should emit "playerDisconnect" to the socket when a player disconnects', async () => {
         TestUtils.setSessionTokenAndTownID(testingTown.coveyTownID, session.sessionToken, mockSocket);
         townSubscriptionHandler(mockSocket);
@@ -291,7 +317,6 @@ describe('CoveyTownController', () => {
           const message: Message = {
             body: 'test message', 
             senderId: nanoid(), 
-            ownedByCurrentUser: true,
             userName: nanoid(),
             dateCreated: new Date(),
             isBroadcast: true,
