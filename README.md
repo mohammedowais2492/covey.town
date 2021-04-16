@@ -46,3 +46,10 @@ Create a `.env` file in the `frontend` directory, with the line: `REACT_APP_TOWN
 
 In the `frontend` directory, run `npm start` (again, you'll need to run `npm install` the very first time). After several moments (or minutes, depending on the speed of your machine), a browser will open with the frontend running locally.
 The frontend will automatically re-compile and reload in your browser if you change any files in the `frontend/src` directory.
+
+### Note
+This project is private and to access it please contact any of the below mentioned collaborators.
+
+ahmed.moham@northeastern.edu [GitHub](https://github.com/mohammedowais2492)
+
+arya.am@northeastern.edu [GitHub](https://github.com/ameyarya)
