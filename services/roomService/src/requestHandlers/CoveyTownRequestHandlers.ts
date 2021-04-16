@@ -1,7 +1,7 @@
 import assert from 'assert';
-import io, { Socket } from 'socket.io';
+import { Socket } from 'socket.io';
 import Player from '../types/Player';
-import { CoveyTownList, UserLocation } from '../CoveyTypes';
+import { CoveyTownList, UserLocation, Message } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import CoveyTownsStore from '../lib/CoveyTownsStore';
 
@@ -190,6 +190,9 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
       socket.emit('townClosing');
       socket.disconnect(true);
     },
+    onPlayerChatted(message: Message) {
+      socket.emit('playerChatted', message);
+    },
   };
 }
 
@@ -198,7 +201,7 @@ function townSocketAdapter(socket: Socket): CoveyTownListener {
  *
  * @param socket the Socket object that we will use to communicate with the player
  */
-export function townSubscriptionHandler(socket: Socket, ioServer: io.Server): void {
+export function townSubscriptionHandler(socket: Socket): void {
   // Parse the client's session token from the connection
   // For each player, the session token should be the same string returned by joinTownHandler
   const { token, coveyTownID } = socket.handshake.auth as { token: string; coveyTownID: string };
@@ -233,6 +236,7 @@ export function townSubscriptionHandler(socket: Socket, ioServer: io.Server): vo
     townController.updatePlayerLocation(s.player, movementData);
   });
 
+<<<<<<< HEAD
   // Listen for new messages
   socket.on(coveyTownID, (msg) => {
     ioServer.emit(coveyTownID, msg);
@@ -252,4 +256,11 @@ export function townSubscriptionHandler(socket: Socket, ioServer: io.Server): vo
     // ioServer.of(coveyTownID).to(msg.sentTo).emit(coveyTownID, msg);
   });
 
+=======
+  // Register an event listener for the client socket: if the client receives a message
+  // inform the CoveyTownController
+  socket.on('playerChatted', (message: Message) => {
+    townController.updatePlayerChats(message);
+  });
+>>>>>>> d36a5e0a7b897b2f0b48de61986b66a2fcdde71e
 }

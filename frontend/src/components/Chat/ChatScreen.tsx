@@ -1,136 +1,41 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useState, useRef } from "react";
 import { Socket } from 'socket.io-client';
-import {
-  IconButton, ListItem, TextField,
-} from "@material-ui/core";
+import Moment from 'moment';
+import { IconButton, ListItem } from "@material-ui/core";
 import { Send } from "@material-ui/icons";
-import { Select } from '@chakra-ui/react';
+import { Select, Button, Stack } from '@chakra-ui/react';
 import useCoveyAppState from "../../hooks/useCoveyAppState";
 import './ChatScreen.css';
 import useMaybeVideo from "../../hooks/useMaybeVideo";
 
-const NEW_CHAT_MESSAGE_EVENT = "groupMessage"; // Name of the event
-// const SOCKET_SERVER_URL = "http://localhost:8081";
-
 const useChat = (coveyTownID: string, socket: Socket) => {
-  const [messages, setMessages] = useState<MsgFormat[]>([]);
-  const [sentTo, setSentTo] = useState('everyone');
-  const [sentBy, setSentBy] = useState('');
-  const [privateMessages, setMessagesPrivate] = useState<MsgFormatPrivate[]>([]); // Sent and received messages
   const socketRef = useRef(socket);
 
   const {
-    userName
+    userName,
+    messages,
+    myPlayerID
   } = useCoveyAppState();
 
-  useEffect(() => {
-
-    // Listens for incoming messages
-    socketRef?.current?.on(coveyTownID, (message: any) => {
-      const incomingMessage = {
-        ...message,
-        ownedByCurrentUser: message.senderId === socketRef.current?.id,
-      };
-      setMessages((msgs) => [...msgs, incomingMessage]);
-    });
-
-    socketRef?.current?.on(`${coveyTownID}'private'`, (message: any) => {
-      const incomingMessage = {
-        ...message,
-        ownedByCurrentUser: message.senderId === socketRef.current?.id,
-      };
-      setMessagesPrivate((msgs) => [...msgs, incomingMessage]);
-      setSentTo(message.sentTo);
-      setSentBy(message.sentBy);
-    });
-
-    // Destroys the socket reference
-    // when the connection is closed
-    // return () => {
-    //   socketRef.current.disconnect();
-    // };
-  }, [coveyTownID]);
-
-  // useEffect(() => {
-
-  //   // Listens for incoming messages
-  //   socketRef?.current?.on(`${coveyTownID}'private'`, (message: any) => {
-  //     const incomingMessage = {
-  //       ...message,
-  //       ownedByCurrentUser: message.senderId === socketRef.current?.id,
-  //     };
-  //     setMessagesPrivate((msgs) => [...msgs, incomingMessage]);
-  //   });
-
-  //   // Destroys the socket reference
-  //   // when the connection is closed
-  //   // return () => {
-  //   //   socketRef.current.disconnect();
-  //   // };
-  // }, [coveyTownID]);
-
-  // Sends a message to the server that
-  // forwards it to all users in the same room
-  // const sendMessage = (receiver: string, messageBody: string) => {
-  //   socketRef.current.emit(coveyTownID,{
-  //     body: messageBody,
-  //     senderId: socketRef.current.id,
-  //     ownedByCurrentUser: true,
-  //     userName,
-  //     dateCreated: new Date(),
-  //     sentTo: receiver
-  //   });
-
-  //   // socketRef.current.emit(NEW_CHAT_MESSAGE_EVENT, messageBody) ;
-
-  // };
-
-  const sendMessage = (messageBody: string) => {
-    socketRef.current.emit(coveyTownID,{
+  const sendMessage = (messageBody: string, isBroadcast: boolean, receiver: string) => {
+    socketRef.current.emit("playerChatted", {
       body: messageBody,
-      senderId: socketRef.current.id,
+      senderId: myPlayerID,
       ownedByCurrentUser: true,
       userName,
-      dateCreated: new Date()
-    });
+      dateCreated: new Date().toISOString(),
+      isBroadcast,
+      receiverId: receiver,
+    }); 
   };
-
-  const sendMessagePrivate = (receiver: string, sender: string, messageBody: string) => {
-    socketRef.current.emit(`${coveyTownID}'private'`,{
-      body: messageBody,
-      senderId: socketRef.current.id,
-      ownedByCurrentUser: true,
-      userName,
-      dateCreated: new Date(),
-      sentTo: receiver,
-      sentBy: sender
-    });
-  };
-
-  return { sentTo, sentBy , messages, sendMessage, privateMessages, sendMessagePrivate };
+  return { messages, sendMessage };
 };
 
-type MsgFormat = {
-  body: string,
-  senderId: string,
-  ownedByCurrentUser: boolean,
-  userName: string,
-  dateCreated: Date
-}
 
-type MsgFormatPrivate = {
-  body: string,
-  senderId: string,
-  ownedByCurrentUser: boolean,
-  userName: string,
-  dateCreated: Date,
-  sentTo: string
-}
-
-const ChatScreen = () => {
+const ChatScreen: any = () => {
 
   const {
-    players, myPlayerID, currentTownID, socket, userName
+    players, myPlayerID, currentTownID, socket, nearbyPlayers
   } = useCoveyAppState();
 
   const [newMessage, setNewMessage] = useState('');
@@ -143,17 +48,15 @@ const ChatScreen = () => {
   } as const;
   const video = useMaybeVideo();
 
-  // console.log('global: ',privateMessages);
-  // console.log('private: ',myPlayerID)
-
-  const handleSubmit = (e: any) => {
+  const handleSubmit = (e:any) => {
     e.preventDefault();
-    if(receiver ===  'everyone') {
-      sendMessage(newMessage);
-    } else {
-      sendMessagePrivate(receiver,myPlayerID,newMessage); 
+    if(receiver === "everyone"){
+      sendMessage(newMessage, true, "");
     }
-    // reset message to empty once sent
+    else{
+      const currReceiver = players.find(player => player.userName === receiver);
+      sendMessage(newMessage, false, currReceiver?.id as string);
+    }
     setNewMessage('');
   }
 
@@ -163,14 +66,15 @@ const ChatScreen = () => {
       alignItems: isOwnMessage ? "flex-end" : "flex-start",
     }) as const,
     container: (isOwnMessage: boolean) => ({
-      maxWidth: "100%",
-      borderRadius: 10,
-      padding: 6,
+      maxWidth: "75%",
+      borderRadius: 12,
+      padding: 8,
       color: "white",
       fontSize: 14,
-      backgroundColor: isOwnMessage ? "#054740" : "#262d31",
+      backgroundColor: isOwnMessage ? "teal" : "black",
     }),
     author: { fontSize: 10, color: "gray" },
+    private: { fontSize: 10, color: "red" },
     timestamp: { fontSize: 8, color: "white", textAlign: "right", paddingTop: 4 } as const,
   };
 
@@ -178,31 +82,54 @@ const ChatScreen = () => {
     <div>
       <body>
         <div className='heading'>Chat Box</div>
-        <div className='mbox'>
-          <Select onChange={(e) => setReceiver(e.target.value)}>
+        <div className='selectPlayer'>
+          <Select onChange={(e) => setReceiver(e.target.value)} value={receiver}>
             <option value="everyone">Everyone</option>
-            {players.filter(player => player.id !== myPlayerID).map(player => <option key={player.userName} value={player.id}> {player.userName} </option>)}
+            {players.filter(player => player.id !== myPlayerID).map(player => <option key={player.userName} value={player.userName}> {player.userName} </option>)}
           </Select>
+        </div>
+        <div className='mbox'>
+          <div>
+            {nearbyPlayers?.nearbyPlayers.length !== 0 &&
+              <div className='nearBy'>
+                <h1 style={{paddingTop: 0, paddingBottom: 5, textAlign: "center", fontWeight: "bold"}}>Chat with nearby players: </h1>
+                <div className='nearByBtn'>
+                <Stack style={{paddingBottom: 5, paddingLeft: 5}} direction="row" spacing={3} align="center">
+                  {
+                  nearbyPlayers.nearbyPlayers.map(player => 
+                    <Button variant="outline" 
+                            colorScheme="teal" 
+                            size="sm" 
+                            key={player.userName} 
+                            onClick={() => setReceiver(player.userName)}
+                            style={{
+                                  whiteSpace: "normal",
+                                  wordWrap: "break-word",
+                                  padding: "5px 5px",
+                                  overflow: "auto",
+                                  width: "auto",
+                                  height: "auto",
+                            }}
+                    >
+                      {player.userName}
+                    </Button>
+                    )
+                  }
+                </Stack>
+                </div>
+              </div>
+            }
+          </div>
           <ol>
             {messages.map((message) => (
-              // <li
-              //   key={JSON.stringify(message)}
-              // // className={`message-item ${
-              // //   message.ownedByCurrentUser ? "my-message" : "received-message"
-              // // }`}
-              // >
-              //   {message.body}
-              // </li>
               <ListItem
                 key={JSON.stringify(message)}
                 style={estyles.listItem(message.ownedByCurrentUser)}>
-                <div style={estyles.author}>{message.userName}</div>
+                <div style={message.isBroadcast ? estyles.author : estyles.private}>{message.userName}{message.isBroadcast ? '' : '(Private)'}</div>
                 <div style={estyles.container(message.ownedByCurrentUser)}>
                   {message.body}
-                  {/* <div style={estyles.timestamp}>
-                  {message.dateCreated.toISOString()}
-                </div> */}
                 </div>
+                <div style={estyles.author}>{Moment(message.dateCreated).format('DD MMM hh:mm')}</div>
               </ListItem>
             ))}
           </ol>
@@ -236,17 +163,17 @@ const ChatScreen = () => {
           <input id="input"
             placeholder="Write message..."
             value={newMessage}
-            onChange={(e) => setNewMessage(e.target.value)} 
             onFocus={()=>video?.pauseGame()}
             onBlur={()=>video?.unPauseGame()}
             onKeyPress={e => {
               if(e.key === 'Enter'){
                 if(newMessage.length>0)
-                  handleSubmit(e)
+                  handleSubmit(e);
                 else
                   e.preventDefault();
               }
-              }}
+            }}
+            onChange={(e) => setNewMessage(e.target.value)} 
             />
           <IconButton
             style={styles.sendButton}

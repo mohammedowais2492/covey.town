@@ -1,5 +1,5 @@
 import { customAlphabet, nanoid } from 'nanoid';
-import { UserLocation } from '../CoveyTypes';
+import { UserLocation, Message } from '../CoveyTypes';
 import CoveyTownListener from '../types/CoveyTownListener';
 import Player from '../types/Player';
 import PlayerSession from '../types/PlayerSession';
@@ -120,6 +120,15 @@ export default class CoveyTownController {
   updatePlayerLocation(player: Player, location: UserLocation): void {
     player.updateLocation(location);
     this._listeners.forEach((listener) => listener.onPlayerMoved(player));
+  }
+
+
+  /**
+   * Updates the messages of a player
+   * @param message Message that was sent
+   */
+  updatePlayerChats(message: Message): void {
+    this._listeners.forEach((listener) => listener.onPlayerChatted(message));
   }
 
   /**
